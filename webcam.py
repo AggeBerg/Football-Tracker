@@ -5,7 +5,7 @@ import imutils
 import numpy as np
 import time
 
-vc = cv2.VideoCapture(2)
+vc = cv2.VideoCapture(0)
 vc.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
 vc.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 fourcc = cv2.VideoWriter_fourcc(*"MJPG")
@@ -31,6 +31,9 @@ cv2.createTrackbar("max_h", "result", 175, 255, test)
 cv2.createTrackbar("max_s", "result", 255, 255, test)
 cv2.createTrackbar("max_v", "result", 255, 255, test)
 
+cv2.createTrackbar("dilate", "result", 2, 16, test)
+cv2.createTrackbar("erode", "result", 2, 16, test)
+
 if vc.isOpened():  # try to get the first frame
     rval, frame = vc.read()
 else:
@@ -43,11 +46,13 @@ while rval:
     max_h = cv2.getTrackbarPos("max_h", "result")
     max_s = cv2.getTrackbarPos("max_s", "result")
     max_v = cv2.getTrackbarPos("max_v", "result")
+    dilate_iterations = cv2.getTrackbarPos("dilate", "result")
+    erode_iterations = cv2.getTrackbarPos("erode", "result")
     frame_to_tresh = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     thresh = cv2.inRange(frame_to_tresh, (min_h, min_s,
                          min_v), (max_h, max_s, max_v))
-    mask = cv2.erode(thresh, None, iterations=2)
-    mask = cv2.dilate(mask, None, iterations=2)
+    mask = cv2.erode(thresh, None, iterations=erode_iterations)
+    mask = cv2.dilate(mask, None, iterations=dilate_iterations)
     contours = cv2.findContours(
         mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = imutils.grab_contours(contours)
