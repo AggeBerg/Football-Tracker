@@ -36,7 +36,8 @@ int pid(int current, int target, double P, double I, double D) {
 
 void setup() {
     Serial.begin(921600);
-    
+    analogWriteFreq(300);
+    analogWriteRange(1023);
     pinMode(MOTOR_A_DIR, OUTPUT);
     pinMode(MOTOR_A_SPEED, OUTPUT);
     pinMode(MOTOR_B_DIR, OUTPUT);
@@ -81,7 +82,7 @@ void loop() {
     //digitalWrite(MOTOR_A_DIR, X>=0);
     int aSpeed = pid(X, 0, P, I, D);
     digitalWrite(MOTOR_A_DIR, aSpeed<=0);
-    analogWrite(MOTOR_A_SPEED, abs(aSpeed));
+    analogWrite(MOTOR_A_SPEED, map(abs(aSpeed),0,1023,0,300));
     //analogWrite(MOTOR_B_SPEED, abs(Speed * Y));
     
     if (abs(Y) < 150) {Y = 0;}
