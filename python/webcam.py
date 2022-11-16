@@ -7,7 +7,6 @@ import time
 import serial
 
 esp_serial = serial.Serial("/dev/ttyUSB0", 921600)
-esp_serial.write(b"d0.95s0.05")
 
 vc = cv2.VideoCapture(2)
 vc.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
@@ -35,6 +34,10 @@ cv2.createTrackbar("max_h", "result", 175, 255, test)
 cv2.createTrackbar("max_s", "result", 255, 255, test)
 cv2.createTrackbar("max_v", "result", 255, 255, test)
 
+cv2.createTrackbar("p", "result", 0, 1000, test) 
+cv2.createTrackbar("i", "result", 0, 1000, test) 
+cv2.createTrackbar("d", "result", 0, 1000, test) 
+
 cv2.createTrackbar("dilate", "result", 2, 16, test)
 cv2.createTrackbar("erode", "result", 2, 16, test)
 
@@ -43,6 +46,8 @@ if vc.isOpened():  # try to get the first frame
 else:
     rval = False
 
+lastPid = [0, 0, 0]
+
 while rval:
     min_h = cv2.getTrackbarPos("min_h", "result")
     min_s = cv2.getTrackbarPos("min_s", "result")
@@ -50,6 +55,14 @@ while rval:
     max_h = cv2.getTrackbarPos("max_h", "result")
     max_s = cv2.getTrackbarPos("max_s", "result")
     max_v = cv2.getTrackbarPos("max_v", "result")
+
+    p = cv2.getTrackbarPos("p", "result") / 100
+    i = cv2.getTrackbarPos("i", "result") / 100
+    d = cv2.getTrackbarPos("d", "result") / 100
+    
+    if lastPid != [p, i, d]:
+        esp_serial.write(f"p{p}i{i}d{d}\n".encode("utf-8"))
+    lastPid = [p, i ,d]
     dilate_iterations = cv2.getTrackbarPos("dilate", "result")
     erode_iterations = cv2.getTrackbarPos("erode", "result")
     frame_to_tresh = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
