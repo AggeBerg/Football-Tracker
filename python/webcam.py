@@ -4,8 +4,12 @@ from cv2 import minEnclosingCircle
 import imutils
 import numpy as np
 import time
+import serial
 
-vc = cv2.VideoCapture(0)
+esp_serial = serial.Serial("/dev/ttyUSB0", 921600)
+esp_serial.write(b"d0.95s0.05")
+
+vc = cv2.VideoCapture(2)
 vc.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
 vc.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 fourcc = cv2.VideoWriter_fourcc(*"MJPG")
@@ -70,7 +74,10 @@ while rval:
         #print(x, y)
         points.append((int(x), int(y)))
         #print(int(x), int(y))
-        print(int(x) - frame_x / 2, int(y) - frame_y / 2)
+        line = f"x{int(x) - frame_x / 2}y{int(y) - frame_y / 2}\n"
+        #print(line, end="")
+        esp_serial.write(line.encode("utf-8"))
+        print(esp_serial.read_all().decode("utf-8"))
         cropped = frame[
             max(int(y - radius * 4), 0):min(int(y + radius * 4), 1919), 
             max(int(x - radius * 4), 0):min(int(x + radius * 4), 1919)
@@ -94,3 +101,5 @@ while rval:
 
 vc.release()
 cv2.destroyWindow("result")
+
+esp_serial.close()
