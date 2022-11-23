@@ -23,8 +23,7 @@ int pid(int current, int target, double P, double I, double D) {
   Serial.println(Integral);
   LastTick = millis();
   double derivative = (error - PreviousError) / (TICK_SPEED / 1000.0);
-  long int tempOutput = (P * error + I * Integral + D * derivative);
-  int output = (tempOutput < 256) ? ((tempOutput > -256) ? tempOutput: -255): 255;
+  long int output = (P * error + I * Integral + D * derivative);
 
   Serial.printf(
       "current: %8i, target, %8i, output:  %8i, p: %8.2f, i: %8.2f, d: %8.2f\n",
@@ -36,7 +35,7 @@ int pid(int current, int target, double P, double I, double D) {
 
 void setup() {
     Serial.begin(921600);
-    analogWriteFreq(300);
+    analogWriteFreq(20000);
     analogWriteRange(1023);
     pinMode(MOTOR_A_DIR, OUTPUT);
     pinMode(MOTOR_A_SPEED, OUTPUT);
@@ -63,6 +62,7 @@ void loop() {
         else if (String(iterator) == "p") {current_state = state_p; continue;}
         else if (String(iterator) == "i") {current_state = state_i; continue;}
         else if (String(iterator) == "d") {current_state = state_d; continue;}
+        else if (String(iterator) == "r") {current_state = state_none; Integral = Integral * 0.90; continue;}
         
         if (current_state != state_none) {
             if(current_state == state_x) {x += iterator;}
@@ -82,7 +82,7 @@ void loop() {
     //digitalWrite(MOTOR_A_DIR, X>=0);
     int aSpeed = pid(X, 0, P, I, D);
     digitalWrite(MOTOR_A_DIR, aSpeed<=0);
-    analogWrite(MOTOR_A_SPEED, map(abs(aSpeed),0,1023,0,300));
+    analogWrite(MOTOR_A_SPEED, map(abs(aSpeed),0,1023,570,1023));
     //analogWrite(MOTOR_B_SPEED, abs(Speed * Y));
     
     if (abs(Y) < 150) {Y = 0;}
